@@ -2,8 +2,6 @@
    "N":1,
    "iStart":0.01,
    "rStart":0,
-   "transmission":3.2,
-   "recovery":0.23,
    "maxTime":20,
    "resolution":10
 }

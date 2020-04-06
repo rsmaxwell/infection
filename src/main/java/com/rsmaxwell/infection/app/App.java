@@ -32,7 +32,7 @@ public class App {
 					            .longOpt("config")
 					            .argName("config")
 					            .hasArg()
-					            .desc("config file")
+					            .desc("configuration directory")
 					            .build();
 			// @formatter:on
 
@@ -63,11 +63,11 @@ public class App {
 
 		CommandLine line = getCommandLine(args);
 
-		String filename = "config.json";
+		String dirname = "config";
 		if (line.hasOption('c')) {
-			filename = line.getOptionValue("c");
+			dirname = line.getOptionValue("c");
 		}
-		Config config = Config.load(filename);
+		Config config = Config.load(dirname);
 
 		Model model = new Model(config);
 		model.run();
