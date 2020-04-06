@@ -1,9 +1,9 @@
 package com.rsmaxwell.infection.config;
 
-import java.io.File;
+import java.io.FileReader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 public class Config {
 
@@ -19,10 +19,10 @@ public class Config {
 	public double maxTime = 20;
 	public int resolution = 10;
 
-	private static ObjectMapper objectMapper;
+	private static Gson gson;
 
 	static {
-		objectMapper = new ObjectMapper();
+		gson = new Gson();
 	}
 
 	static public Config load(String filename) throws Exception {
@@ -30,7 +30,7 @@ public class Config {
 		Config config = null;
 
 		try {
-			config = objectMapper.readValue(new File(filename), Config.class);
+			config = gson.fromJson(new FileReader(filename), Config.class);
 
 			config.sStart = config.N - config.iStart;
 
