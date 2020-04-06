@@ -1,6 +1,6 @@
-package com.rsmaxwell.corvid19.config.integrate;
+package com.rsmaxwell.infection.integrate;
 
-import com.rsmaxwell.corvid19.config.quantity.Quantity;
+import com.rsmaxwell.infection.quantity.Quantity;
 
 public class RungeKutta implements Integrate {
 

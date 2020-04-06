@@ -1,12 +1,12 @@
-package com.rsmaxwell.corvid19.config.model;
+package com.rsmaxwell.infection.model;
 
-import com.rsmaxwell.corvid19.config.config.Config;
-import com.rsmaxwell.corvid19.config.integrate.Integrate;
-import com.rsmaxwell.corvid19.config.integrate.RungeKutta;
-import com.rsmaxwell.corvid19.config.quantity.Infected;
-import com.rsmaxwell.corvid19.config.quantity.Quantity;
-import com.rsmaxwell.corvid19.config.quantity.Recovered;
-import com.rsmaxwell.corvid19.config.quantity.Suseptible;
+import com.rsmaxwell.infection.config.Config;
+import com.rsmaxwell.infection.integrate.Integrate;
+import com.rsmaxwell.infection.integrate.RungeKutta;
+import com.rsmaxwell.infection.quantity.Infected;
+import com.rsmaxwell.infection.quantity.Quantity;
+import com.rsmaxwell.infection.quantity.Recovered;
+import com.rsmaxwell.infection.quantity.Suseptible;
 
 public class Model {
 

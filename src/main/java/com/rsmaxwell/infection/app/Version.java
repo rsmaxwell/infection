@@ -1,4 +1,4 @@
-package com.rsmaxwell.corvid19.config.app;
+package com.rsmaxwell.infection.app;
 
 public class Version {
 

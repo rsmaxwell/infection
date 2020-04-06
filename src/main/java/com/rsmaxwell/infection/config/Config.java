@@ -1,4 +1,4 @@
-package com.rsmaxwell.corvid19.config.config;
+package com.rsmaxwell.infection.config;
 
 import java.io.File;
 

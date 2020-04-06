@@ -1,4 +1,4 @@
-package com.rsmaxwell.corvid19.config.app;
+package com.rsmaxwell.infection.app;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -8,8 +8,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.rsmaxwell.corvid19.config.config.Config;
-import com.rsmaxwell.corvid19.config.model.Model;
+import com.rsmaxwell.infection.config.Config;
+import com.rsmaxwell.infection.model.Model;
 
 public class App {
 

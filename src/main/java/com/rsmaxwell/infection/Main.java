@@ -1,7 +1,7 @@
-package com.rsmaxwell.corvid19.config;
+package com.rsmaxwell.infection;
 
-import com.rsmaxwell.corvid19.config.config.Config;
-import com.rsmaxwell.corvid19.config.model.Model;
+import com.rsmaxwell.infection.config.Config;
+import com.rsmaxwell.infection.model.Model;
 
 public class Main {
 

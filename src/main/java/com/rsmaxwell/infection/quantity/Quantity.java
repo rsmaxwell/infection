@@ -1,4 +1,4 @@
-package com.rsmaxwell.corvid19.config.quantity;
+package com.rsmaxwell.infection.quantity;
 
 public abstract class Quantity implements RateFunction {
 
