@@ -1,23 +1,16 @@
 package com.rsmaxwell.infection.model;
 
 import com.rsmaxwell.infection.config.Config;
+import com.rsmaxwell.infection.config.Connector;
+import com.rsmaxwell.infection.config.Group;
+import com.rsmaxwell.infection.config.Pair;
 import com.rsmaxwell.infection.quantity.Infected;
-import com.rsmaxwell.infection.quantity.Quantity;
 import com.rsmaxwell.infection.quantity.Recovered;
-import com.rsmaxwell.infection.quantity.Suseptible;
+import com.rsmaxwell.infection.quantity.Susceptible;
 
 public class Model {
 
 	private Config config;
-
-	public static void heading() {
-		System.out.printf(" time     Suseptible       Infected      Recovered\n");
-		System.out.printf("--------------------------------------------------\n");
-	}
-
-	public static void output(double t, Quantity S, Quantity I, Quantity R) {
-		System.out.printf("%5.2f          %5.2f          %5.2f          %5.2f\n", t, S.value, I.value, R.value);
-	}
 
 	public Model(Config config) {
 		this.config = config;
@@ -26,14 +19,20 @@ public class Model {
 	public void run() {
 
 		double t = 0;
-
 		double dt = 1.0 / config.resolution;
-		Quantity S = new Suseptible(config.sStart);
-		Quantity I = new Infected(config.iStart);
-		Quantity R = new Recovered(config.rStart);
 
-		heading();
-		output(t, S, I, R);
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+			group.S = new Susceptible(group.sStart);
+			group.I = new Infected(group.iStart);
+			group.R = new Recovered(group.rStart);
+		}
+
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+			group.heading();
+			group.output(t);
+		}
 
 		for (int j = 0; j < config.maxTime; j++) {
 			for (int k = 0; k <= config.resolution; k++) {
@@ -41,10 +40,18 @@ public class Model {
 
 				t = i * dt;
 
-				config.integrate.step(t, dt, S, I, R);
+				for (String id : config.groups.keySet()) {
+					Group group = config.groups.get(id);
+					Pair key = new Pair(id, id);
+					Connector connector = config.connectors.get(key);
+					group.integrate(t, dt, config.integrate, connector);
+				}
 			}
 
-			output(t, S, I, R);
+			for (String id : config.groups.keySet()) {
+				Group group = config.groups.get(id);
+				group.output(t);
+			}
 		}
 	}
 }

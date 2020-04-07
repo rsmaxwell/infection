@@ -19,6 +19,7 @@ public class Config {
 	public double iStart;
 	public double rStart;
 	public double maxTime;
+	public double transmission;
 	public int resolution;
 	public String integrationMethod;
 
@@ -131,6 +132,8 @@ public class Config {
 		for (String id : config.groups.keySet()) {
 			Group group = config.groups.get(id);
 			group.N = group.population / total;
+
+			group.sStart = group.N - group.iStart;
 		}
 
 		// ******************************************************************
