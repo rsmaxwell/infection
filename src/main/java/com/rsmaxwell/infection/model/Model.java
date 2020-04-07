@@ -28,30 +28,25 @@ public class Model {
 			group.R = new Recovered(group.rStart);
 		}
 
-		for (String id : config.groups.keySet()) {
-			Group group = config.groups.get(id);
-			group.heading();
-			group.output(t);
-		}
+		for (int i = 0; i < config.maxTime * config.resolution; i++) {
+			t = i * dt;
 
-		for (int j = 0; j < config.maxTime; j++) {
-			for (int k = 0; k <= config.resolution; k++) {
-				int i = config.resolution * j + k;
-
-				t = i * dt;
-
-				for (String id : config.groups.keySet()) {
-					Group group = config.groups.get(id);
-					Pair key = new Pair(id, id);
-					Connector connector = config.connectors.get(key);
-					group.integrate(t, dt, config.integrate, connector);
-				}
+			for (String id : config.groups.keySet()) {
+				Group group = config.groups.get(id);
+				Pair key = new Pair(id, id);
+				Connector connector = config.connectors.get(key);
+				group.integrate(t, dt, config.integrate, connector);
 			}
 
 			for (String id : config.groups.keySet()) {
 				Group group = config.groups.get(id);
-				group.output(t);
+				group.store(t);
 			}
+		}
+
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+			config.output.print(group.name, group.results);
 		}
 	}
 }

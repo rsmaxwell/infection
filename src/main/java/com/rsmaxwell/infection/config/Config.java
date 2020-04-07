@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.Gson;
 import com.rsmaxwell.infection.integrate.Integrate;
+import com.rsmaxwell.infection.output.Output;
 
 public class Config {
 
@@ -22,6 +23,10 @@ public class Config {
 	public double transmission;
 	public int resolution;
 	public String integrationMethod;
+	public String outputMethod;
+
+	@JsonIgnore
+	public Output output;
 
 	@JsonIgnore
 	public Integrate integrate;
@@ -62,6 +67,19 @@ public class Config {
 		}
 
 		config.integrate = (Integrate) object;
+
+		// ******************************************************************
+		// * Get the output method
+		// ******************************************************************
+		clazz = Class.forName(config.outputMethod);
+		ctor = clazz.getConstructor();
+		object = ctor.newInstance();
+
+		if (!Output.class.isInstance(object)) {
+			throw new Exception("The class [" + config.integrationMethod + "] does not implement [" + Output.class.getName() + "]");
+		}
+
+		config.output = (Output) object;
 
 		// ******************************************************************
 		// * Read the population groups
