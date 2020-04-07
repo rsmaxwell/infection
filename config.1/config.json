@@ -1,0 +1,5 @@
+{
+   "maxTime":20,
+   "resolution":10,
+   "integrationMethod": "com.rsmaxwell.infection.integrate.RungeKutta"
+}
