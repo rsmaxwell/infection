@@ -2,6 +2,7 @@ package com.rsmaxwell.infection.config;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Constructor;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.Gson;
+import com.rsmaxwell.infection.integrate.Integrate;
 
 public class Config {
 
@@ -18,6 +20,10 @@ public class Config {
 	public double rStart;
 	public double maxTime;
 	public int resolution;
+	public String integrationMethod;
+
+	@JsonIgnore
+	public Integrate integrate;
 
 	@JsonIgnore
 	public double sStart;
@@ -42,6 +48,19 @@ public class Config {
 			throw new Exception(filename, e);
 		}
 		config.sStart = config.N - config.iStart;
+
+		// ******************************************************************
+		// * Get the integration method
+		// ******************************************************************
+		Class<?> clazz = Class.forName(config.integrationMethod);
+		Constructor<?> ctor = clazz.getConstructor();
+		Object object = ctor.newInstance();
+
+		if (!Integrate.class.isInstance(object)) {
+			throw new Exception("The class [" + config.integrationMethod + "] does not implement [" + Integrate.class.getName() + "]");
+		}
+
+		config.integrate = (Integrate) object;
 
 		// ******************************************************************
 		// * Read the population groups
@@ -89,6 +108,29 @@ public class Config {
 			}
 		} catch (Exception e) {
 			throw new Exception(filename, e);
+		}
+
+		// ******************************************************************
+		// * Normalise the group populations
+		// ******************************************************************
+		double total = 0;
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+
+			if (group.population < 0) {
+				throw new Exception("Group [ " + id + "]: '" + group.name + "' has a negative population");
+			}
+
+			total += group.population;
+		}
+
+		if (total < 1) {
+			throw new Exception("The total population is less than 1");
+		}
+
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+			group.N = group.population / total;
 		}
 
 		// ******************************************************************

@@ -1,8 +1,6 @@
 package com.rsmaxwell.infection.model;
 
 import com.rsmaxwell.infection.config.Config;
-import com.rsmaxwell.infection.integrate.Integrate;
-import com.rsmaxwell.infection.integrate.RungeKutta;
 import com.rsmaxwell.infection.quantity.Infected;
 import com.rsmaxwell.infection.quantity.Quantity;
 import com.rsmaxwell.infection.quantity.Recovered;
@@ -34,9 +32,6 @@ public class Model {
 		Quantity I = new Infected(config.iStart);
 		Quantity R = new Recovered(config.rStart);
 
-		// Integrate integrate = new Euler();
-		Integrate integrate = new RungeKutta();
-
 		heading();
 		output(t, S, I, R);
 
@@ -46,7 +41,7 @@ public class Model {
 
 				t = i * dt;
 
-				integrate.step(t, dt, S, I, R);
+				config.integrate.step(t, dt, S, I, R);
 			}
 
 			output(t, S, I, R);
