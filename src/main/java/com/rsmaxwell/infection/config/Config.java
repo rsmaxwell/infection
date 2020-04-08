@@ -16,13 +16,18 @@ import com.rsmaxwell.infection.output.Output;
 
 public class Config {
 
-	// public double N;
 	public double iStart;
 	public double maxTime;
 	public double transmission;
 	public int resolution;
 	public String integrationMethod;
 	public String outputMethod;
+
+	@JsonIgnore
+	public double dt;
+
+	@JsonIgnore
+	public double totalPopulation = 0;
 
 	@JsonIgnore
 	public Output output;
@@ -42,7 +47,9 @@ public class Config {
 	@JsonIgnore
 	public Map<Pair, Connector> connectors = new HashMap<Pair, Connector>();
 
-	static public Config load(String dirname) throws Exception {
+	public static Config INSTANCE;
+
+	public static void load(String dirname) throws Exception {
 		Config config = null;
 		Gson gson = new Gson();
 
@@ -131,8 +138,9 @@ public class Config {
 		}
 
 		// ******************************************************************
-		// * Normalise the group populations
+		// * Calculate the initial values, and the totalPopulation
 		// ******************************************************************
+		config.dt = 1.0 / config.resolution;
 
 		for (String id : config.groups.keySet()) {
 			Group group = config.groups.get(id);
@@ -140,18 +148,19 @@ public class Config {
 			group.rStart = 0;
 		}
 
-		double totalPop = 0.0;
+		config.totalPopulation = 0.0;
 		for (String id : config.groups.keySet()) {
 			Group group = config.groups.get(id);
-			totalPop += group.population;
+
+			if (group.population < 0) {
+				throw new Exception("The population of group [ " + id + " : " + group.name + " ]: cannot be negative: " + group.population);
+			}
+
+			config.totalPopulation += group.population;
 		}
 
-		for (String id : config.groups.keySet()) {
-			Group group = config.groups.get(id);
-
-			group.sStart = group.sStart * group.population / totalPop;
-			group.iStart = group.iStart * group.population / totalPop;
-			group.rStart = group.rStart * group.population / totalPop;
+		if (config.totalPopulation < 1e-6) {
+			throw new Exception("The totalPopulation cannot be negative: " + config.totalPopulation);
 		}
 
 		// ******************************************************************
@@ -185,7 +194,7 @@ public class Config {
 			throw new Exception("There are no groups");
 		}
 
-		return config;
+		INSTANCE = config;
 	}
 
 	private static String getGroupId(File file) throws Exception {

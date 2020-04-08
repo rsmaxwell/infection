@@ -67,9 +67,9 @@ public class App {
 		if (line.hasOption('c')) {
 			dirname = line.getOptionValue("c");
 		}
-		Config config = Config.load(dirname);
+		Config.load(dirname);
 
-		Model model = new Model(config);
+		Model model = new Model();
 		model.run();
 	}
 }
