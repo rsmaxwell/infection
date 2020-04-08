@@ -18,7 +18,6 @@ public class Population {
 	public String id;
 	public Group group;
 
-	public double N;
 	public Quantity S;
 	public Quantity I;
 	public Quantity R;
