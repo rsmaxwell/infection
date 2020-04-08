@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rsmaxwell.infection.config.Config;
-import com.rsmaxwell.infection.config.Connector;
 import com.rsmaxwell.infection.config.Group;
-import com.rsmaxwell.infection.config.Pair;
 import com.rsmaxwell.infection.output.Result;
 import com.rsmaxwell.infection.quantity.Infected;
 import com.rsmaxwell.infection.quantity.Quantity;
@@ -40,9 +38,7 @@ public class Population {
 	}
 
 	public void step(double t) {
-		Pair key = new Pair(id, id);
-		Connector connector = Config.INSTANCE.connectors.get(key);
-		Config.INSTANCE.integrate.step(t, Config.INSTANCE.dt, S, I, R, group, connector);
+		Config.INSTANCE.integrate.step(t, Config.INSTANCE.dt, this);
 	}
 
 	public void output() {
