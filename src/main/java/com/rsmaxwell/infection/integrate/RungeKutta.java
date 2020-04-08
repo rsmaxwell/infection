@@ -18,6 +18,10 @@ public class RungeKutta implements Integrate {
 		String id = population.id;
 		Group group = population.group;
 
+		double t2 = t + h / 2.0;
+		double t3 = t + h / 2.0;
+		double t4 = t + h;
+
 		double dSdt = 0;
 		double dIdt = 0;
 		double dRdt = 0;
@@ -25,10 +29,6 @@ public class RungeKutta implements Integrate {
 		for (String id2 : populations.populations.keySet()) {
 			Population other = populations.populations.get(id2);
 			Connector connector = config.connectors.get(new Pair(id, id2));
-
-			double t2 = t + h / 2.0;
-			double t3 = t + h / 2.0;
-			double t4 = t + h;
 
 			double k1S = population.S.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
 			double k1I = population.I.rate(t, other.S.value, other.I.value, other.R.value, group, connector);

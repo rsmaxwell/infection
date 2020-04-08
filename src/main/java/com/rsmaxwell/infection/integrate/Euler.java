@@ -10,7 +10,7 @@ import com.rsmaxwell.infection.model.Populations;
 public class Euler implements Integrate {
 
 	@Override
-	public void step(double t, double dt, Population population) {
+	public void step(double t, double h, Population population) {
 
 		Config config = Config.INSTANCE;
 		Populations populations = Populations.INSTANCE;
@@ -31,8 +31,8 @@ public class Euler implements Integrate {
 			dRdt += population.R.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
 		}
 
-		population.S.add(dSdt * dt);
-		population.I.add(dIdt * dt);
-		population.R.add(dRdt * dt);
+		population.S.add(dSdt * h);
+		population.I.add(dIdt * h);
+		population.R.add(dRdt * h);
 	}
 }
