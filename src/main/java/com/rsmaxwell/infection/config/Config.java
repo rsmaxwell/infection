@@ -16,9 +16,8 @@ import com.rsmaxwell.infection.output.Output;
 
 public class Config {
 
-	public double N;
+	// public double N;
 	public double iStart;
-	public double rStart;
 	public double maxTime;
 	public double transmission;
 	public int resolution;
@@ -33,6 +32,9 @@ public class Config {
 
 	@JsonIgnore
 	public double sStart;
+
+	@JsonIgnore
+	public double rStart;
 
 	@JsonIgnore
 	public Map<String, Group> groups = new HashMap<String, Group>();
@@ -53,7 +55,6 @@ public class Config {
 		} catch (Exception e) {
 			throw new Exception(filename, e);
 		}
-		config.sStart = config.N - config.iStart;
 
 		// ******************************************************************
 		// * Get the integration method
@@ -132,26 +133,25 @@ public class Config {
 		// ******************************************************************
 		// * Normalise the group populations
 		// ******************************************************************
-		double total = 0;
-		for (String id : config.groups.keySet()) {
-			Group group = config.groups.get(id);
-
-			if (group.population < 0) {
-				throw new Exception("Group [ " + id + "]: '" + group.name + "' has a negative population");
-			}
-
-			total += group.population;
-		}
-
-		if (total < 1) {
-			throw new Exception("The total population is less than 1");
-		}
 
 		for (String id : config.groups.keySet()) {
 			Group group = config.groups.get(id);
-			group.N = group.population / total;
+			group.sStart = 1.0 - group.iStart;
+			group.rStart = 0;
+		}
 
-			group.sStart = group.N - group.iStart;
+		double totalPop = 0.0;
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+			totalPop += group.population;
+		}
+
+		for (String id : config.groups.keySet()) {
+			Group group = config.groups.get(id);
+
+			group.sStart = group.sStart * group.population / totalPop;
+			group.iStart = group.iStart * group.population / totalPop;
+			group.rStart = group.rStart * group.population / totalPop;
 		}
 
 		// ******************************************************************

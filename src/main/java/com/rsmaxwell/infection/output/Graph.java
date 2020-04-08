@@ -14,43 +14,53 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 public class Graph implements Output {
 
-	XYSeriesCollection dataset = new XYSeriesCollection();
-
 	@Override
 	public void print(String name, List<Result> results) {
 
-		int size = results.size();
+		XYSeries seriesS = new XYSeries("Susceptible");
+		XYSeries seriesI = new XYSeries("Infected");
+		XYSeries seriesR = new XYSeries("Recovered");
 
-		Double[] S = new Double[size * 2];
-		Double[] I = new Double[size * 2];
-		Double[] R = new Double[size * 2];
-
-		for (int i = 0; i < size; i++) {
-			Result result = results.get(i);
-			int j = 2 * i;
-
-			S[j] = result.t;
-			S[j + 1] = result.S;
-
-			I[j] = result.t;
-			I[j + 1] = result.I;
-
-			R[j] = result.t;
-			R[j + 1] = result.R;
+		for (Result result : results) {
+			seriesS.add(result.t, result.S);
+			seriesI.add(result.t, result.I);
+			seriesR.add(result.t, result.R);
 		}
 
-		dataset.addSeries(createDataSet(S, "Susceptible"));
-		dataset.addSeries(createDataSet(I, "Infected"));
-		dataset.addSeries(createDataSet(R, "Recovered"));
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		dataset.addSeries(seriesS);
+		dataset.addSeries(seriesI);
+		dataset.addSeries(seriesR);
 
-		JFreeChart chart = createChart(null);
+		String title = "Viral Spread Within a Population";
+		String xLabel = "Time";
+		String yLabel = "Fraction of Population";
+		boolean legend = true;
+		boolean tooltips = true;
+		boolean urls = false;
+		JFreeChart chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, tooltips, urls);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.white);
+		plot.setRangeGridlinesVisible(true);
+		plot.setRangeGridlinePaint(Color.BLACK);
+		plot.setDomainGridlinesVisible(true);
+		plot.setDomainGridlinePaint(Color.BLACK);
+
+		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+		renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+		renderer.setSeriesStroke(1, new BasicStroke(2.0f));
+		renderer.setSeriesStroke(2, new BasicStroke(2.0f));
+
+		chart.getLegend().setFrame(BlockBorder.NONE);
+		chart.setTitle(new TextTitle(title, new Font("Serif", java.awt.Font.BOLD, 18)));
 
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -62,46 +72,5 @@ public class Graph implements Output {
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-	}
-
-	// take an array of data and convert it into a dataset
-	public XYSeries createDataSet(Double[] xyData, String key) {
-
-		XYSeries series = new XYSeries(key);
-		for (int i = 0; i < xyData.length; i = i + 2) {
-			series.add(xyData[i], xyData[i + 1]);
-		}
-
-		XYSeriesCollection dataset = new XYSeriesCollection();
-		dataset.addSeries(series);
-
-		return series;
-	}
-
-	// Create and draw the chart
-	private JFreeChart createChart(XYDataset[] filler) {
-
-		JFreeChart chart = ChartFactory.createXYLineChart("Viral Spread Within a Population", "Time", "Percentage of Population (%)", dataset,
-				PlotOrientation.VERTICAL, true, true, false);
-
-		XYPlot plot = chart.getXYPlot();
-
-		plot.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f));
-		plot.getRenderer().setSeriesStroke(1, new BasicStroke(2.0f));
-		plot.getRenderer().setSeriesStroke(2, new BasicStroke(2.0f));
-
-		plot.setBackgroundPaint(Color.white);
-
-		plot.setRangeGridlinesVisible(true);
-		plot.setRangeGridlinePaint(Color.BLACK);
-
-		plot.setDomainGridlinesVisible(true);
-		plot.setDomainGridlinePaint(Color.BLACK);
-
-		chart.getLegend().setFrame(BlockBorder.NONE);
-
-		chart.setTitle(new TextTitle("Viral Spread Within a Population", new Font("Serif", java.awt.Font.BOLD, 18)));
-
-		return chart;
 	}
 }
