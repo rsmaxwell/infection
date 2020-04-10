@@ -1,8 +1,11 @@
 # infection
 
-Drop this Maven project into Eclipse and build 
+Uses a simple SIR compartmental model to predict the progress of an infection in a set of populations. 
+
 
 ## Run
+
+Drop this Maven project into Eclipse and build
 
 java -cp ${CLASSPATH} com.rsmaxwell.infection.app.App -c **CONFIG**
 
@@ -11,6 +14,8 @@ Where **CONFIG** is a directory containing:
   - a directory: "groups"
   - a directory: "connectors"
   
+A population is constructed from each group, and the SIR model used to predict the progress of an infection. 
+Output is generated for each population and also a combined output for the total population.
 
 
 ## Configuration
