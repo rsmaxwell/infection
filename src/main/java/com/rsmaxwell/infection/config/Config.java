@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.Gson;
 import com.rsmaxwell.infection.integrate.Integrate;
+import com.rsmaxwell.infection.integrate.Step;
 import com.rsmaxwell.infection.output.Output;
 
 public class Config {
@@ -70,7 +71,7 @@ public class Config {
 		Constructor<?> ctor = clazz.getConstructor();
 		Object object = ctor.newInstance();
 
-		if (!Integrate.class.isInstance(object)) {
+		if (!Step.class.isInstance(object)) {
 			throw new Exception("The class [" + config.integrationMethod + "] does not implement [" + Integrate.class.getName() + "]");
 		}
 

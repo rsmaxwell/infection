@@ -4,5 +4,6 @@ import com.rsmaxwell.infection.model.Population;
 
 public interface Integrate {
 
-	void step(double t, double dt, Population population);
+	public void step(double t, double h, Population population);
+
 }
