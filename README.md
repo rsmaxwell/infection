@@ -4,9 +4,9 @@ Drop this Maven project into Eclipse and build
 
 ## Run
 
-java -cp ${CLASSPATH} com.rsmaxwell.infection.app.App -c <CONFIG>
+java -cp ${CLASSPATH} com.rsmaxwell.infection.app.App -c **CONFIG**
 
-Where <CONFIG> is a directory containing:
+Where **CONFIG** is a directory containing:
   - a file: "config.json"
   - a directory: "groups"
   - a directory: "connectors"
