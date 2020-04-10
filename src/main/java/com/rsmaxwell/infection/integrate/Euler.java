@@ -9,6 +9,8 @@ import com.rsmaxwell.infection.model.Populations;
 
 public class Euler implements Integrate {
 
+	// The SIR deltas for ALL the populations are calculated first, before adding
+	// the deltas to the SIR values
 	@Override
 	public void step(double t, double h, Population population) {
 
@@ -26,13 +28,19 @@ public class Euler implements Integrate {
 			Population other = populations.populations.get(id2);
 			Connector connector = config.connectors.get(new Pair(id, id2));
 
-			dSdt += population.S.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
-			dIdt += population.I.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
-			dRdt += population.R.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
+			double factor = other.group.population / Config.INSTANCE.totalPopulation;
+
+			double kS = population.S.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
+			double kI = population.I.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
+			double kR = population.R.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
+
+			dSdt += factor * kS;
+			dIdt += factor * kI;
+			dRdt += factor * kR;
 		}
 
-		population.S.add(dSdt * h);
-		population.I.add(dIdt * h);
-		population.R.add(dRdt * h);
+		population.S.delta = dSdt * h;
+		population.I.delta = dIdt * h;
+		population.R.delta = dRdt * h;
 	}
 }

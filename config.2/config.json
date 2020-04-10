@@ -1,8 +1,6 @@
 {
-   "N":1,
-   "iStart":0.01,
-   "rStart":0,
    "maxTime":20,
    "resolution":10,
-   "integrationMethod": "com.rsmaxwell.infection.integrate.RungeKutta"
+   "integrationMethod": "com.rsmaxwell.infection.integrate.Euler",
+   "outputMethod": "com.rsmaxwell.infection.output.Graph"
 }

@@ -26,11 +26,9 @@ public class Population {
 		this.id = id;
 		this.group = group;
 
-		double factor = group.population / Config.INSTANCE.totalPopulation;
-
-		S = new Susceptible(group.sStart * factor);
-		I = new Infected(group.iStart * factor);
-		R = new Recovered(group.rStart * factor);
+		S = new Susceptible(group.sStart);
+		I = new Infected(group.iStart);
+		R = new Recovered(group.rStart);
 	}
 
 	public void store(double t) {
@@ -43,5 +41,20 @@ public class Population {
 
 	public void output() {
 		Config.INSTANCE.output.print(group.name, results);
+	}
+
+	public void zero() {
+		S.value = 0;
+		I.value = 0;
+		R.value = 0;
+	}
+
+	public void add(Population population) {
+
+		double factor = population.group.population / Config.INSTANCE.totalPopulation;
+
+		S.value += factor * population.S.value;
+		I.value += factor * population.I.value;
+		R.value += factor * population.R.value;
 	}
 }

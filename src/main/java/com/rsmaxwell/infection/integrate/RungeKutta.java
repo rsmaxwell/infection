@@ -9,6 +9,8 @@ import com.rsmaxwell.infection.model.Populations;
 
 public class RungeKutta implements Integrate {
 
+	// The SIR deltas for ALL the populations are calculated first, before adding
+	// the deltas to the SIR values
 	@Override
 	public void step(double t, double h, Population population) {
 
@@ -29,6 +31,8 @@ public class RungeKutta implements Integrate {
 		for (String id2 : populations.populations.keySet()) {
 			Population other = populations.populations.get(id2);
 			Connector connector = config.connectors.get(new Pair(id, id2));
+
+			double factor = other.group.population / Config.INSTANCE.totalPopulation;
 
 			double k1S = population.S.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
 			double k1I = population.I.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
@@ -58,13 +62,17 @@ public class RungeKutta implements Integrate {
 			double k4I = population.I.rate(t4, S4, I4, R4, group, connector);
 			double k4R = population.R.rate(t4, S4, I4, R4, group, connector);
 
-			dSdt += (k1S + 2.0 * (k2S + k3S) + k4S) / 6.0;
-			dIdt += (k1I + 2.0 * (k2I + k3I) + k4I) / 6.0;
-			dRdt += (k1R + 2.0 * (k2R + k3R) + k4R) / 6.0;
+			double kS = (k1S + 2.0 * (k2S + k3S) + k4S) / 6.0;
+			double kI = (k1I + 2.0 * (k2I + k3I) + k4I) / 6.0;
+			double kR = (k1R + 2.0 * (k2R + k3R) + k4R) / 6.0;
+
+			dSdt += factor * kS;
+			dIdt += factor * kI;
+			dRdt += factor * kR;
 		}
 
-		population.S.add(h * dSdt);
-		population.I.add(h * dIdt);
-		population.R.add(h * dRdt);
+		population.S.delta = dSdt * h;
+		population.I.delta = dIdt * h;
+		population.R.delta = dRdt * h;
 	}
 }
