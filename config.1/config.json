@@ -1,6 +1,0 @@
-{
-   "maxTime":20,
-   "resolution":10,
-   "integrationMethod": "com.rsmaxwell.infection.integrate.RungeKutta",
-   "outputMethod": "com.rsmaxwell.infection.output.Graph"
-}
