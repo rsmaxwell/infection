@@ -226,8 +226,8 @@ public class Population {
 
 		// ********************************************************
 		// * We need to remove the alpha channel from the image
-		// * or SunJPEGEncoderAdapter will blow up with "javax.imageio.IIOException:
-		// Bogus input colorspace"
+		// * or SunJPEGEncoderAdapter will blow up with:
+		// * "javax.imageio.IIOException: Bogus input colorspace"
 		// ********************************************************
 
 		// Create a second BufferedImage of type TYPE_INT_RGB...
