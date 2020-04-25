@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,15 +15,17 @@ import java.util.zip.ZipOutputStream;
 
 import com.rsmaxwell.infection.model.config.Config;
 import com.rsmaxwell.infection.model.config.Group;
+import com.rsmaxwell.infection.model.integrate.Integrate;
 
 public class Populations {
 
 	public Map<String, Population> populations = new HashMap<String, Population>();
 	public Population everyone;
+	public double totalPopulation = 0;
 
 	public static Populations INSTANCE;
 
-	public Populations() {
+	public Populations() throws Exception {
 		for (String id : Config.INSTANCE.groups.keySet()) {
 			Group group = Config.INSTANCE.groups.get(id);
 			populations.put(id, new Population(id, group));
@@ -33,6 +36,24 @@ public class Populations {
 
 		everyone = new Population("All", all);
 		INSTANCE = this;
+
+		// ************************************************************************
+		// * Sum the total population
+		// ************************************************************************
+		totalPopulation = 0.0;
+		for (String id : Config.INSTANCE.groups.keySet()) {
+			Group group = Config.INSTANCE.groups.get(id);
+
+			if (group.population < 0) {
+				throw new Exception("The population of group [ " + id + " : " + group.name + " ]: cannot be negative: " + group.population);
+			}
+
+			totalPopulation += group.population;
+		}
+
+		if (totalPopulation < 1e-6) {
+			throw new Exception("The totalPopulation cannot be negative: " + totalPopulation);
+		}
 	}
 
 	// The SIR deltas for ALL the populations are calculated first, before adding
@@ -41,12 +62,12 @@ public class Populations {
 	// This is because ALL the current SIR values are used to calculate the SIR
 	// deltas for each population, so they must not be changed till we know all the
 	// deltas
-	public void step(double t) {
+	public void step(double t, double dt, Integrate integrate) {
 
 		// Calculate the SIR deltas for this step
 		for (String id : populations.keySet()) {
 			Population population = populations.get(id);
-			population.step(t);
+			population.step(t, dt, integrate, totalPopulation);
 		}
 
 		// Add the SIR deltas to the SIR values
@@ -67,13 +88,18 @@ public class Populations {
 			Population population = populations.get(id);
 			population.store(t);
 
-			everyone.add(population);
+			everyone.add(population, totalPopulation);
 		}
 
 		everyone.store(t);
 	}
 
-	public void print(String[] filter, PrintStream out) {
+	public void print(PrintStream stream, String[] filter) {
+		PrintWriter out = new PrintWriter(stream);
+		print(out, filter);
+	}
+
+	public void print(PrintWriter out, String[] filter) {
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
 				population.print(out);
@@ -84,7 +110,23 @@ public class Populations {
 		}
 	}
 
-	public void toJson(String[] filter, PrintStream out) {
+	public void print(File outputDirectory, String[] filter) throws IOException {
+		for (Population population : populations.values()) {
+			if (population.matches(filter)) {
+				population.print(outputDirectory);
+			}
+		}
+		if (everyone.matches(filter)) {
+			everyone.print(outputDirectory);
+		}
+	}
+
+	public void toJson(PrintStream stream, String[] filter) {
+		PrintWriter out = new PrintWriter(stream);
+		toJson(out, filter);
+	}
+
+	public void toJson(PrintWriter out, String[] filter) {
 
 		out.println("{ ");
 		out.println("   \"Populations\": {");
@@ -106,6 +148,17 @@ public class Populations {
 		out.printf("\n");
 		out.println("   }");
 		out.println("}");
+	}
+
+	public void toJson(File outputDirectory, String[] filter) throws IOException {
+		for (Population population : populations.values()) {
+			if (population.matches(filter)) {
+				population.toJson(outputDirectory);
+			}
+		}
+		if (everyone.matches(filter)) {
+			everyone.toJson(outputDirectory);
+		}
 	}
 
 	public void swing(String[] filter) {
@@ -148,7 +201,7 @@ public class Populations {
 	// ************************************************************************************************
 	//
 	// ************************************************************************************************
-	public void output_jpeg_archive(String[] filter, OutputStream stream) throws Exception {
+	public void output_jpeg_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -162,11 +215,11 @@ public class Populations {
 		try {
 			for (Population population : populations.values()) {
 				if (population.matches(filter)) {
-					population.output_jpeg(tempDir);
+					population.output_jpeg(tempDir, width, height);
 				}
 			}
 			if (everyone.matches(filter)) {
-				everyone.output_jpeg(tempDir);
+				everyone.output_jpeg(tempDir, width, height);
 			}
 
 			File[] srcFiles = tempDir.listFiles();
@@ -190,41 +243,41 @@ public class Populations {
 		}
 	}
 
-	public void output_jpeg(String[] filter, OutputStream stream) throws Exception {
+	public void output_jpeg(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
 			throw new Exception("No populations match filter: " + Arrays.toString(filter));
 		}
-		if (count != 1) {
+		if (count > 1) {
 			throw new Exception("Too many populations match filter: count:" + count + ", filter: " + Arrays.toString(filter));
 		}
 
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_jpeg(stream);
+				population.output_jpeg(stream, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_jpeg(stream);
+			everyone.output_jpeg(stream, width, height);
 		}
 	}
 
-	public void output_jpeg(String[] filter, File outputDirectory) throws IOException {
+	public void output_jpeg(File outputDirectory, String[] filter, int width, int height) throws IOException {
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_jpeg(outputDirectory);
+				population.output_jpeg(outputDirectory, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_jpeg(outputDirectory);
+			everyone.output_jpeg(outputDirectory, width, height);
 		}
 	}
 
 	// ************************************************************************************************
 	//
 	// ************************************************************************************************
-	public void output_png_archive(String[] filter, OutputStream stream) throws Exception {
+	public void output_png_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -238,11 +291,11 @@ public class Populations {
 		try {
 			for (Population population : populations.values()) {
 				if (population.matches(filter)) {
-					population.output_png(tempDir);
+					population.output_png(tempDir, width, height);
 				}
 			}
 			if (everyone.matches(filter)) {
-				everyone.output_png(tempDir);
+				everyone.output_png(tempDir, width, height);
 			}
 
 			File[] srcFiles = tempDir.listFiles();
@@ -266,7 +319,7 @@ public class Populations {
 		}
 	}
 
-	public void output_png(String[] filter, OutputStream stream) throws Exception {
+	public void output_png(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -278,26 +331,26 @@ public class Populations {
 
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_png(stream);
+				population.output_png(stream, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_png(stream);
+			everyone.output_png(stream, width, height);
 		}
 	}
 
-	public void output_png(String[] filter, File outputDirectory) throws IOException {
+	public void output_png(File outputDirectory, String[] filter, int width, int height) throws IOException {
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_png(outputDirectory);
+				population.output_png(outputDirectory, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_png(outputDirectory);
+			everyone.output_png(outputDirectory, width, height);
 		}
 	}
 
-	public void output_svg_archive(String[] filter, OutputStream stream) throws Exception {
+	public void output_svg_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -308,11 +361,11 @@ public class Populations {
 		try {
 			for (Population population : populations.values()) {
 				if (population.matches(filter)) {
-					population.output_svg(tempDir);
+					population.output_svg(tempDir, width, height);
 				}
 			}
 			if (everyone.matches(filter)) {
-				everyone.output_svg(tempDir);
+				everyone.output_svg(tempDir, width, height);
 			}
 
 			File[] srcFiles = tempDir.listFiles();
@@ -336,7 +389,7 @@ public class Populations {
 		}
 	}
 
-	public void output_svg(String[] filter, OutputStream stream) throws Exception {
+	public void output_svg(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -348,22 +401,22 @@ public class Populations {
 
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_svg(stream);
+				population.output_svg(stream, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_svg(stream);
+			everyone.output_svg(stream, width, height);
 		}
 	}
 
-	public void output_svg(String[] filter, File outputDirectory) throws IOException {
+	public void output_svg(File outputDirectory, String[] filter, int width, int height) throws IOException {
 		for (Population population : populations.values()) {
 			if (population.matches(filter)) {
-				population.output_svg(outputDirectory);
+				population.output_svg(outputDirectory, width, height);
 			}
 		}
 		if (everyone.matches(filter)) {
-			everyone.output_svg(outputDirectory);
+			everyone.output_svg(outputDirectory, width, height);
 		}
 	}
 }

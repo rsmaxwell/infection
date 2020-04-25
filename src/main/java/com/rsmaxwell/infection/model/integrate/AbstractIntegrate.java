@@ -13,7 +13,7 @@ abstract class AbstractIntegrate implements Integrate, Step {
 	// The SIR deltas for ALL the populations are calculated first, before adding
 	// the deltas to the SIR values
 	@Override
-	public void step(double t, double h, Population population) {
+	public void step(double t, double dt, Population population, double totalPopulation) {
 
 		Config config = Config.INSTANCE;
 		Populations populations = Populations.INSTANCE;
@@ -29,17 +29,17 @@ abstract class AbstractIntegrate implements Integrate, Step {
 			Population other = populations.populations.get(id2);
 			Connector connector = config.connectors.get(new Pair(id, id2));
 
-			double factor = other.group.population / Config.INSTANCE.totalPopulation;
+			double factor = other.group.population / totalPopulation;
 
-			Rates rates = calculateRates(t, h, population, other, group, connector);
+			Rates rates = calculateRates(t, dt, population, other, group, connector);
 
 			dSdt += factor * rates.kS;
 			dIdt += factor * rates.kI;
 			dRdt += factor * rates.kR;
 		}
 
-		population.S.delta = dSdt * h;
-		population.I.delta = dIdt * h;
-		population.R.delta = dRdt * h;
+		population.S.delta = dSdt * dt;
+		population.I.delta = dIdt * dt;
+		population.R.delta = dRdt * dt;
 	}
 }

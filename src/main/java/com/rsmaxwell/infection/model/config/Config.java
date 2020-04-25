@@ -1,73 +1,60 @@
 package com.rsmaxwell.infection.model.config;
 
-import java.lang.reflect.Constructor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.rsmaxwell.infection.model.integrate.Integrate;
-import com.rsmaxwell.infection.model.integrate.Step;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 public class Config {
 
-	public double iStart;
 	public double maxTime;
-	public double transmission;
 	public int resolution;
 	public String integrationMethod;
-	public double dt;
-	public double totalPopulation = 0;
-	public Integrate integrate;
-	public double sStart;
-	public double rStart;
-	public Map<String, Group> groups = new HashMap<String, Group>();
-	public Map<Pair, Connector> connectors = new HashMap<Pair, Connector>();
+	public Groups groups = new Groups();
+	public Connectors connectors = new Connectors();
+	public Map<String, Object> output = new HashMap<String, Object>();
 
 	public static Config INSTANCE;
 
-	public Config init() throws Exception {
+	public static Config load(String json) throws Exception {
+		Config config = null;
+		Gson gson = new GsonBuilder().registerTypeAdapter(Connectors.class, new ConnectorsDeserializer()).create();
 
-		// ******************************************************************
-		// * Get the integration method
-		// ******************************************************************
-		Class<?> clazz = Class.forName(integrationMethod);
-		Constructor<?> ctor = clazz.getConstructor();
-		Object object = ctor.newInstance();
-
-		if (!Step.class.isInstance(object)) {
-			throw new Exception("The class [" + integrationMethod + "] does not implement [" + Integrate.class.getName() + "]");
-		}
-
-		integrate = (Integrate) object;
-
-		// ******************************************************************
-		// * Calculate the initial values, and the totalPopulation
-		// ******************************************************************
-		dt = 1.0 / resolution;
-
-		for (String id : groups.keySet()) {
-			Group group = groups.get(id);
-			group.sStart = 1.0 - group.iStart;
-			group.rStart = 0;
-		}
-
-		totalPopulation = 0.0;
-		for (String id : groups.keySet()) {
-			Group group = groups.get(id);
-
-			if (group.population < 0) {
-				throw new Exception("The population of group [ " + id + " : " + group.name + " ]: cannot be negative: " + group.population);
+		try {
+			config = gson.fromJson(json, Config.class);
+		} catch (JsonSyntaxException e) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			pw.printf(e.getMessage());
+			pw.println();
+			String lines[] = json.split("\\r?\\n");
+			for (int i = 0; i < lines.length; i++) {
+				pw.printf("%3d:   %s\n", i + 1, lines[i]);
 			}
-
-			totalPopulation += group.population;
-		}
-
-		if (totalPopulation < 1e-6) {
-			throw new Exception("The totalPopulation cannot be negative: " + totalPopulation);
+			throw new ConfigSyntaxException(sw.getBuffer().toString(), e);
 		}
 
 		// ******************************************************************
-		// * Check the connectors match the groups
+		// * Update and validate the instance
 		// ******************************************************************
+		config.setInstance();
+
+		return config.validate();
+	}
+
+	public void setInstance() throws Exception {
+		INSTANCE = this;
+	}
+
+	// ******************************************************************
+	// * Check the connectors match the groups
+	// ******************************************************************
+	public Config validate() throws Exception {
+
 		for (String id1 : groups.keySet()) {
 			for (String id2 : groups.keySet()) {
 				Pair key = new Pair(id1, id2);
@@ -95,11 +82,6 @@ public class Config {
 		if (groups.size() == 0) {
 			throw new Exception("There are no groups");
 		}
-
-		// ******************************************************************
-		// * Update the instance
-		// ******************************************************************
-		INSTANCE = this;
 
 		return this;
 	}

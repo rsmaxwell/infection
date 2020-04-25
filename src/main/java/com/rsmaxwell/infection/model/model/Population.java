@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -38,8 +38,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import com.rsmaxwell.infection.model.config.Config;
 import com.rsmaxwell.infection.model.config.Group;
+import com.rsmaxwell.infection.model.integrate.Integrate;
 import com.rsmaxwell.infection.model.output.Result;
 import com.rsmaxwell.infection.model.quantity.Infected;
 import com.rsmaxwell.infection.model.quantity.Quantity;
@@ -61,17 +61,21 @@ public class Population {
 		this.id = id;
 		this.group = group;
 
-		S = new Susceptible(group.sStart);
-		I = new Infected(group.iStart);
-		R = new Recovered(group.rStart);
+		double iStart = group.iStart;
+		double sStart = 1.0 - group.iStart;
+		double rStart = 0;
+
+		S = new Susceptible(sStart);
+		I = new Infected(iStart);
+		R = new Recovered(rStart);
 	}
 
 	public void store(double t) {
 		results.add(new Result(t, S.value, I.value, R.value));
 	}
 
-	public void step(double t) {
-		Config.INSTANCE.integrate.step(t, Config.INSTANCE.dt, this);
+	public void step(double t, double dt, Integrate integrate, double totalPopulation) {
+		integrate.step(t, dt, this, totalPopulation);
 	}
 
 	public void zero() {
@@ -80,9 +84,9 @@ public class Population {
 		R.value = 0;
 	}
 
-	public void add(Population population) {
+	public void add(Population population, double totalPopulation) {
 
-		double factor = population.group.population / Config.INSTANCE.totalPopulation;
+		double factor = population.group.population / totalPopulation;
 
 		S.value += factor * population.S.value;
 		I.value += factor * population.I.value;
@@ -104,7 +108,14 @@ public class Population {
 		return false;
 	}
 
-	public void print(PrintStream out) {
+	public void print(File file) throws IOException {
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			PrintWriter out = new PrintWriter(fileOutputStream);
+			print(out);
+		}
+	}
+
+	public void print(PrintWriter out) {
 
 		out.println("");
 		out.println("Population: " + id);
@@ -117,7 +128,14 @@ public class Population {
 		}
 	}
 
-	public void toJson(PrintStream out) {
+	public void toJson(File file) throws IOException {
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			PrintWriter out = new PrintWriter(fileOutputStream);
+			toJson(out);
+		}
+	}
+
+	public void toJson(PrintWriter out) {
 
 		out.println("      \"" + id + "\": {");
 		out.println("         \"Results\": [");
@@ -195,44 +213,45 @@ public class Population {
 		frame.setVisible(true);
 	}
 
-	public void output_jpeg(File outputDirectory) throws IOException {
+	public void output_jpeg(File outputDirectory, int width, int height) throws IOException {
 		File file = new File(outputDirectory, id + ".jpeg");
 		FileOutputStream out = new FileOutputStream(file);
-		output_png(out);
+		output_jpeg(out, width, height);
 	}
 
-	public void output_jpeg(OutputStream out) throws IOException {
+	public void output_jpeg(OutputStream out, int width, int height) throws IOException {
 		JFreeChart chart = createChart();
-		BufferedImage image = chart.createBufferedImage(800, 400);
-		SunJPEGEncoderAdapter png = new SunJPEGEncoderAdapter();
-		png.encode(image, out);
+		BufferedImage image = chart.createBufferedImage(width, height);
+		SunJPEGEncoderAdapter encoder = new SunJPEGEncoderAdapter();
+		encoder.encode(image, out);
 	}
 
-	public void output_png(File outputDirectory) throws IOException {
+	public void output_png(File outputDirectory, int width, int height) throws IOException {
 		File file = new File(outputDirectory, id + ".png");
 		FileOutputStream out = new FileOutputStream(file);
-		output_png(out);
+		output_png(out, width, height);
 	}
 
-	public void output_png(OutputStream out) throws IOException {
+	public void output_png(OutputStream out, int width, int height) throws IOException {
 		JFreeChart chart = createChart();
-		BufferedImage image = chart.createBufferedImage(800, 400);
-		SunPNGEncoderAdapter png = new SunPNGEncoderAdapter();
-		png.encode(image, out);
+		BufferedImage image = chart.createBufferedImage(width, height);
+		SunPNGEncoderAdapter encoder = new SunPNGEncoderAdapter();
+		encoder.encode(image, out);
 	}
 
-	public void output_svg(File outputDirectory) throws IOException {
+	public void output_svg(File outputDirectory, int width, int height) throws IOException {
 
 		File file = new File(outputDirectory, id + ".svg");
 		FileOutputStream stream = new FileOutputStream(file);
 
-		output_svg(stream);
+		output_svg(stream, width, height);
 
 		// no exception, that means ok
 		System.out.println("Population.output_svg: SVG = " + file.getAbsolutePath());
 	}
 
-	public void output_svg(OutputStream out) throws UnsupportedEncodingException, FileNotFoundException, SVGGraphics2DIOException {
+	public void output_svg(OutputStream out, int width, int height)
+			throws UnsupportedEncodingException, FileNotFoundException, SVGGraphics2DIOException {
 
 		JFreeChart chart = createChart();
 
@@ -251,7 +270,7 @@ public class Population {
 		svgGenerator.getGeneratorContext().setPrecision(6);
 
 		// Ask the chart to render into the SVG Graphics2D implementation
-		chart.draw(svgGenerator, new Rectangle2D.Double(0, 0, 800, 400), null);
+		chart.draw(svgGenerator, new Rectangle2D.Double(0, 0, width, height), null);
 
 		// Finally, stream out SVG to a file using UTF-8 character to byte encoding
 		boolean useCSS = true;

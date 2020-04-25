@@ -7,9 +7,6 @@ public class Group {
 	public double population;
 	public double iStart;
 
-	public transient double rStart;
-	public transient double sStart;
-
 	public static String validateName(String name) throws Exception {
 
 		if (!name.matches("[a-zA-Z0-9]+")) {
