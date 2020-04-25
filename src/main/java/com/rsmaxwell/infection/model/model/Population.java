@@ -3,7 +3,6 @@ package com.rsmaxwell.infection.model.model;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -222,26 +221,9 @@ public class Population {
 
 	public void output_jpeg(OutputStream out, int width, int height) throws IOException {
 		JFreeChart chart = createChart();
-		BufferedImage image = chart.createBufferedImage(width, height);
-
-		// ********************************************************
-		// * We need to remove the alpha channel from the image
-		// * or SunJPEGEncoderAdapter will blow up with:
-		// * "javax.imageio.IIOException: Bogus input colorspace"
-		// ********************************************************
-
-		// Create a second BufferedImage of type TYPE_INT_RGB...
-		BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-
-		// Paint the original to the copy...
-		Graphics2D g2d = copy.createGraphics();
-		g2d.setColor(Color.WHITE); // Or what ever fill color you want...
-		g2d.fillRect(0, 0, copy.getWidth(), copy.getHeight());
-		g2d.drawImage(image, 0, 0, null);
-		g2d.dispose();
-
+		BufferedImage image = chart.createBufferedImage(width, height, BufferedImage.TYPE_INT_RGB, null);
 		SunJPEGEncoderAdapter encoder = new SunJPEGEncoderAdapter();
-		encoder.encode(copy, out);
+		encoder.encode(image, out);
 	}
 
 	public void output_png(File outputDirectory, int width, int height) throws IOException {
