@@ -201,7 +201,7 @@ public class Populations {
 	// ************************************************************************************************
 	//
 	// ************************************************************************************************
-	public void output_jpeg_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
+	public void output_jpegzip(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -277,7 +277,7 @@ public class Populations {
 	// ************************************************************************************************
 	//
 	// ************************************************************************************************
-	public void output_png_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
+	public void output_pngzip(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
@@ -350,7 +350,7 @@ public class Populations {
 		}
 	}
 
-	public void output_svg_archive(OutputStream stream, String[] filter, int width, int height) throws Exception {
+	public void output_svgzip(OutputStream stream, String[] filter, int width, int height) throws Exception {
 
 		int count = count(filter);
 		if (count < 1) {
