@@ -169,7 +169,7 @@ public class Population {
 		dataset.addSeries(seriesI);
 		dataset.addSeries(seriesR);
 
-		String title = "Population: " + id;
+		String title = "Population[" + id + "]: " + group.name;
 		String xLabel = "Time";
 		String yLabel = "Fraction of Population";
 		boolean legend = true;
@@ -215,8 +215,9 @@ public class Population {
 
 	public void output_jpeg(File outputDirectory, int width, int height) throws IOException {
 		File file = new File(outputDirectory, id + ".jpeg");
-		FileOutputStream out = new FileOutputStream(file);
-		output_jpeg(out, width, height);
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			output_jpeg(out, width, height);
+		}
 	}
 
 	public void output_jpeg(OutputStream out, int width, int height) throws IOException {
@@ -228,8 +229,9 @@ public class Population {
 
 	public void output_png(File outputDirectory, int width, int height) throws IOException {
 		File file = new File(outputDirectory, id + ".png");
-		FileOutputStream out = new FileOutputStream(file);
-		output_png(out, width, height);
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			output_png(out, width, height);
+		}
 	}
 
 	public void output_png(OutputStream out, int width, int height) throws IOException {
@@ -242,12 +244,9 @@ public class Population {
 	public void output_svg(File outputDirectory, int width, int height) throws IOException {
 
 		File file = new File(outputDirectory, id + ".svg");
-		FileOutputStream stream = new FileOutputStream(file);
-
-		output_svg(stream, width, height);
-
-		// no exception, that means ok
-		System.out.println("Population.output_svg: SVG = " + file.getAbsolutePath());
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			output_svg(stream, width, height);
+		}
 	}
 
 	public void output_svg(OutputStream out, int width, int height)
