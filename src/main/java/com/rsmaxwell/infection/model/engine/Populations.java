@@ -60,13 +60,6 @@ public class Populations {
 	// deltas
 	public void step(double t, double dt) {
 
-		System.err.println("-----------------------------------------------------");
-
-		StringBuffer sb = new StringBuffer();
-		sb.append(String.format("%-30s", "Populations.step(1):"));
-		sb.append("t: " + t);
-		System.err.println(sb.toString());
-
 		// Calculate the SIR deltas for this step
 		for (Population population : populations.values()) {
 			Engine.INSTANCE.integrate.step(t, dt, population, this, totalPopulation);
@@ -74,25 +67,7 @@ public class Populations {
 
 		// Add the deltas to the SIR values
 		for (Population population : populations.values()) {
-
-			sb = new StringBuffer();
-			sb.append(String.format("%-30s", "Populations.step(2):"));
-			sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
-			sb.append("sir: " + population.sir);
-			System.err.println(sb.toString());
-
 			population.sir = population.sir.add(population.delta);
-
-			sb = new StringBuffer();
-			sb.append(String.format("%-30s", "Populations.step(3):"));
-			sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
-			sb.append("sir: " + population.sir);
-			System.err.println(sb.toString());
-
-			int x = 0;
-			if (population.sir.infected < 0) {
-				x = 1;
-			}
 		}
 	}
 
