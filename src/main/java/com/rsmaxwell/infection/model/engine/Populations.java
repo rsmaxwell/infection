@@ -1,4 +1,4 @@
-package com.rsmaxwell.infection.model.model;
+package com.rsmaxwell.infection.model.engine;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,15 +15,12 @@ import java.util.zip.ZipOutputStream;
 
 import com.rsmaxwell.infection.model.config.Config;
 import com.rsmaxwell.infection.model.config.Group;
-import com.rsmaxwell.infection.model.integrate.Integrate;
 
 public class Populations {
 
 	public Map<String, Population> populations = new HashMap<String, Population>();
 	public Population everyone;
 	public double totalPopulation = 0;
-
-	public static Populations INSTANCE;
 
 	public Populations() throws Exception {
 		for (String id : Config.INSTANCE.groups.keySet()) {
@@ -35,7 +32,6 @@ public class Populations {
 		all.name = "Everyone";
 
 		everyone = new Population("All", all);
-		INSTANCE = this;
 
 		// ************************************************************************
 		// * Sum the total population
@@ -62,33 +58,53 @@ public class Populations {
 	// This is because ALL the current SIR values are used to calculate the SIR
 	// deltas for each population, so they must not be changed till we know all the
 	// deltas
-	public void step(double t, double dt, Integrate integrate) {
+	public void step(double t, double dt) {
+
+		System.err.println("-----------------------------------------------------");
+
+		StringBuffer sb = new StringBuffer();
+		sb.append(String.format("%-30s", "Populations.step(1):"));
+		sb.append("t: " + t);
+		System.err.println(sb.toString());
 
 		// Calculate the SIR deltas for this step
-		for (String id : populations.keySet()) {
-			Population population = populations.get(id);
-			population.step(t, dt, integrate, totalPopulation);
+		for (Population population : populations.values()) {
+			Engine.INSTANCE.integrate.step(t, dt, population, this, totalPopulation);
 		}
 
-		// Add the SIR deltas to the SIR values
-		for (String id : populations.keySet()) {
-			Population population = populations.get(id);
+		// Add the deltas to the SIR values
+		for (Population population : populations.values()) {
 
-			population.S.value += population.S.delta;
-			population.I.value += population.I.delta;
-			population.R.value += population.R.delta;
+			sb = new StringBuffer();
+			sb.append(String.format("%-30s", "Populations.step(2):"));
+			sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+			sb.append("sir: " + population.sir);
+			System.err.println(sb.toString());
+
+			population.sir = population.sir.add(population.delta);
+
+			sb = new StringBuffer();
+			sb.append(String.format("%-30s", "Populations.step(3):"));
+			sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+			sb.append("sir: " + population.sir);
+			System.err.println(sb.toString());
+
+			int x = 0;
+			if (population.sir.infected < 0) {
+				x = 1;
+			}
 		}
 	}
 
 	public void store(double t) {
 
-		everyone.zero();
+		everyone.sir.zero();
 
-		for (String id : populations.keySet()) {
-			Population population = populations.get(id);
+		for (Population population : populations.values()) {
 			population.store(t);
 
-			everyone.add(population, totalPopulation);
+			double factor = population.group.population / totalPopulation;
+			everyone.sir = population.sir.multiply(factor).add(everyone.sir);
 		}
 
 		everyone.store(t);

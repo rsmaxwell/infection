@@ -1,45 +1,57 @@
 package com.rsmaxwell.infection.model.integrate;
 
-import com.rsmaxwell.infection.model.config.Config;
-import com.rsmaxwell.infection.model.config.Connector;
-import com.rsmaxwell.infection.model.config.Group;
-import com.rsmaxwell.infection.model.config.Pair;
-import com.rsmaxwell.infection.model.model.Population;
-import com.rsmaxwell.infection.model.model.Populations;
-import com.rsmaxwell.infection.model.model.Rates;
+import com.rsmaxwell.infection.model.engine.Population;
+import com.rsmaxwell.infection.model.engine.Populations;
+import com.rsmaxwell.infection.model.model.Quantity;
 
-abstract class AbstractIntegrate implements Integrate, Step {
+abstract class AbstractIntegrate implements Integrate, Rate {
 
 	// The SIR deltas for ALL the populations are calculated first, before adding
 	// the deltas to the SIR values
 	@Override
-	public void step(double t, double dt, Population population, double totalPopulation) {
+	public void step(double t, double dt, Population population, Populations populations, double totalPopulation) {
 
-		Config config = Config.INSTANCE;
-		Populations populations = Populations.INSTANCE;
+		Quantity totalRates = new Quantity();
 
-		String id = population.id;
-		Group group = population.group;
+		for (Population other : populations.populations.values()) {
 
-		double dSdt = 0;
-		double dIdt = 0;
-		double dRdt = 0;
-
-		for (String id2 : populations.populations.keySet()) {
-			Population other = populations.populations.get(id2);
-			Connector connector = config.connectors.get(new Pair(id, id2));
-
+			int x = 0;
 			double factor = other.group.population / totalPopulation;
 
-			Rates rates = calculateRates(t, dt, population, other, group, connector);
+			if ("2".equals(population.id) && "1".equals(other.id)) {
+				x = 1;
+			}
 
-			dSdt += factor * rates.kS;
-			dIdt += factor * rates.kI;
-			dRdt += factor * rates.kR;
+			Quantity rates = rate(t, dt, population, other);
+
+			StringBuffer sb = new StringBuffer();
+			sb.append(String.format("%-30s", "AbstractIntegrate.step(1):"));
+			sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+			sb.append(String.format("%-30s", "other: " + other.group.name + "(" + other.id + ")"));
+			sb.append("rates: " + rates);
+			System.err.println(sb.toString());
+
+			totalRates = rates.multiply(factor).add(totalRates);
 		}
 
-		population.S.delta = dSdt * dt;
-		population.I.delta = dIdt * dt;
-		population.R.delta = dRdt * dt;
+		StringBuffer sb = new StringBuffer();
+		sb.append(String.format("%-30s", "AbstractIntegrate.step(2):"));
+		sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+		sb.append("totalRates: " + totalRates);
+		System.err.println(sb.toString());
+
+		sb = new StringBuffer();
+		sb.append(String.format("%-30s", "AbstractIntegrate.step(3):"));
+		sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+		sb.append("population.delta: " + population.delta + ", ");
+		System.err.println(sb.toString());
+
+		population.delta = totalRates.multiply(dt);
+
+		sb = new StringBuffer();
+		sb.append(String.format("%-30s", "AbstractIntegrate.step(4): "));
+		sb.append(String.format("%-30s", "population: " + population.group.name + "(" + population.id + ")"));
+		sb.append("population.delta: " + population.delta);
+		System.err.println(sb.toString());
 	}
 }

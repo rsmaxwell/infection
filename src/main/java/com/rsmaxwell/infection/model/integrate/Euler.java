@@ -1,21 +1,23 @@
 package com.rsmaxwell.infection.model.integrate;
 
+import com.rsmaxwell.infection.model.config.Config;
 import com.rsmaxwell.infection.model.config.Connector;
 import com.rsmaxwell.infection.model.config.Group;
-import com.rsmaxwell.infection.model.model.Population;
-import com.rsmaxwell.infection.model.model.Rates;
+import com.rsmaxwell.infection.model.config.Pair;
+import com.rsmaxwell.infection.model.engine.Engine;
+import com.rsmaxwell.infection.model.engine.Population;
+import com.rsmaxwell.infection.model.model.Quantity;
 
 public class Euler extends AbstractIntegrate {
 
 	// The SIR deltas for ALL the populations are calculated first, before adding
 	// the deltas to the SIR values
 	@Override
-	public Rates calculateRates(double t, double h, Population population, Population other, Group group, Connector connector) {
+	public Quantity rate(double t, double dt, Population population, Population other) {
 
-		double kS = population.S.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
-		double kI = population.I.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
-		double kR = population.R.rate(t, other.S.value, other.I.value, other.R.value, group, connector);
+		Group group = population.group;
+		Connector connector = Config.INSTANCE.connectors.get(new Pair(population.id, other.id));
 
-		return new Rates(kS, kI, kR);
+		return Engine.INSTANCE.model.rate(t, dt, population.sir, other.sir, group, connector);
 	}
 }

@@ -1,4 +1,4 @@
-package com.rsmaxwell.infection.model.model;
+package com.rsmaxwell.infection.model.engine;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -39,21 +39,15 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import com.rsmaxwell.infection.model.config.Group;
-import com.rsmaxwell.infection.model.integrate.Integrate;
+import com.rsmaxwell.infection.model.model.Quantity;
 import com.rsmaxwell.infection.model.output.Result;
-import com.rsmaxwell.infection.model.quantity.Infected;
-import com.rsmaxwell.infection.model.quantity.Quantity;
-import com.rsmaxwell.infection.model.quantity.Recovered;
-import com.rsmaxwell.infection.model.quantity.Susceptible;
 
 public class Population {
 
 	public String id;
 	public Group group;
-
-	public Quantity S;
-	public Quantity I;
-	public Quantity R;
+	public Quantity sir;
+	public Quantity delta;
 
 	public List<Result> results = new ArrayList<Result>();
 
@@ -64,33 +58,12 @@ public class Population {
 		double iStart = group.iStart;
 		double sStart = 1.0 - group.iStart;
 		double rStart = 0;
-
-		S = new Susceptible(sStart);
-		I = new Infected(iStart);
-		R = new Recovered(rStart);
+		sir = new Quantity(sStart, iStart, rStart);
+		delta = new Quantity();
 	}
 
 	public void store(double t) {
-		results.add(new Result(t, S.value, I.value, R.value));
-	}
-
-	public void step(double t, double dt, Integrate integrate, double totalPopulation) {
-		integrate.step(t, dt, this, totalPopulation);
-	}
-
-	public void zero() {
-		S.value = 0;
-		I.value = 0;
-		R.value = 0;
-	}
-
-	public void add(Population population, double totalPopulation) {
-
-		double factor = population.group.population / totalPopulation;
-
-		S.value += factor * population.S.value;
-		I.value += factor * population.I.value;
-		R.value += factor * population.R.value;
+		results.add(new Result(t, sir));
 	}
 
 	public boolean matches(String[] filter) {
@@ -120,8 +93,8 @@ public class Population {
 		out.println("");
 		out.println("Population: " + id);
 		out.println("");
-		out.println("Time   Susceptible    Infected    Recovered");
-		out.println("-------------------------------------------");
+		out.println(" Time   Susceptible      Infected     Recovered");
+		out.println("-----------------------------------------------");
 
 		for (Result result : results) {
 			result.print(out);
@@ -159,9 +132,9 @@ public class Population {
 		XYSeries seriesR = new XYSeries("Recovered");
 
 		for (Result result : results) {
-			seriesS.add(result.t, result.S);
-			seriesI.add(result.t, result.I);
-			seriesR.add(result.t, result.R);
+			seriesS.add(result.t, result.sir.susceptible);
+			seriesI.add(result.t, result.sir.infected);
+			seriesR.add(result.t, result.sir.recovered);
 		}
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
