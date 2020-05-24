@@ -58,7 +58,7 @@ public class Populations {
 	// This is because ALL the current SIR values are used to calculate the SIR
 	// deltas for each population, so they must not be changed till we know all the
 	// deltas
-	public void step(double t, double dt) {
+	public void step(double t, double dt) throws Exception {
 
 		// Calculate the SIR deltas for this step
 		for (Population population : populations.values()) {

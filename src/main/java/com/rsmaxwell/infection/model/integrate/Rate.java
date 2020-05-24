@@ -5,6 +5,6 @@ import com.rsmaxwell.infection.model.model.Quantity;
 
 public interface Rate {
 
-	Quantity rate(double t, double h, Population population, Population other);
+	Quantity rate(double t, double h, Population population, Population other, double recovery, double transmission);
 
 }

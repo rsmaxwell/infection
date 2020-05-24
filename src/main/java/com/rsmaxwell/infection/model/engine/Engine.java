@@ -3,6 +3,7 @@ package com.rsmaxwell.infection.model.engine;
 import java.lang.reflect.Constructor;
 
 import com.rsmaxwell.infection.model.config.Config;
+import com.rsmaxwell.infection.model.handler.MyResponseInterface;
 import com.rsmaxwell.infection.model.integrate.Integrate;
 import com.rsmaxwell.infection.model.model.Model;
 import com.rsmaxwell.infection.model.model.SirModel;
@@ -43,7 +44,7 @@ public class Engine {
 		INSTANCE = this;
 	}
 
-	public Populations run() throws Exception {
+	public void run(MyResponseInterface response) throws Exception {
 
 		Populations populations = new Populations();
 
@@ -54,6 +55,6 @@ public class Engine {
 			populations.store(t);
 		}
 
-		return populations;
+		config.handler.format(response, populations);
 	}
 }

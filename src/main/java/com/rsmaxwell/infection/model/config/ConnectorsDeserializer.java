@@ -8,6 +8,10 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.rsmaxwell.infection.model.expression.Evaluate;
+import com.rsmaxwell.infection.model.expression.Expression;
+import com.rsmaxwell.infection.model.expression.Script;
+import com.rsmaxwell.infection.model.expression.Value;
 
 class ConnectorsDeserializer implements JsonDeserializer<Connectors> {
 
@@ -19,16 +23,29 @@ class ConnectorsDeserializer implements JsonDeserializer<Connectors> {
 
 		while (ite.hasNext()) {
 			Map.Entry<String, JsonElement> entry = ite.next();
+			String name = entry.getKey();
 
-			Pair key = null;
 			try {
-				key = Connector.validateName(entry.getKey());
+				new ConnectorNameInfo(name);
 			} catch (Exception e) {
 				throw new JsonParseException(e);
 			}
 
-			Connector connectorInfo = context.deserialize(entry.getValue(), Connector.class);
-			connectors.put(key, connectorInfo);
+			ConnectorLiteral literal = context.deserialize(entry.getValue(), ConnectorLiteral.class);
+			Connector connector = new Connector();
+
+			Expression expression = null;
+			if (literal.transmission != null) {
+				expression = new Value(literal.transmission);
+			} else if (literal.transmissionEval != null) {
+				expression = new Evaluate(literal.transmissionEval);
+			} else if (literal.transmissionScript != null) {
+				expression = new Script(literal.transmissionScript);
+			} else {
+				expression = new Value(0);
+			}
+			connector.setTransmission(expression);
+			connectors.put(name, connector);
 		}
 
 		return connectors;

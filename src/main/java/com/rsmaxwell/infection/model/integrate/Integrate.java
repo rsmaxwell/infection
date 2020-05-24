@@ -5,6 +5,6 @@ import com.rsmaxwell.infection.model.engine.Populations;
 
 public interface Integrate {
 
-	public void step(double t, double dt, Population population, Populations populations, double totalPopulation);
+	public void step(double t, double dt, Population population, Populations populations, double totalPopulation) throws Exception;
 
 }
