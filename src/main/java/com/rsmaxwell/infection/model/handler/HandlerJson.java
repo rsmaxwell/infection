@@ -13,6 +13,9 @@ public class HandlerJson extends Handler {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeJson();
+
 		PrintWriter out = response.getWriter();
 		populations.toJson(out, filter);
 	}

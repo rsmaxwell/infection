@@ -13,6 +13,9 @@ public class HandlerPng extends HandlerGraphics {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypePng();
+
 		OutputStream out = response.getOutputStream();
 		populations.output_png(out, filter, width, height);
 	}

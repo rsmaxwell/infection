@@ -13,6 +13,9 @@ public class HandlerJpegZip extends HandlerGraphics {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeZip();
+
 		OutputStream out = response.getOutputStream();
 		populations.output_jpegzip(out, filter, width, height);
 	}

@@ -13,6 +13,9 @@ public class HandlerPngZip extends HandlerGraphics {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeZip();
+
 		OutputStream out = response.getOutputStream();
 		populations.output_pngzip(out, filter, width, height);
 	}

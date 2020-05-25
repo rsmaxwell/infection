@@ -9,4 +9,16 @@ public interface MyResponseInterface {
 	OutputStream getOutputStream() throws IOException;
 
 	PrintWriter getWriter() throws IOException;
+
+	void setTypeJpeg();
+
+	void setTypePng();
+
+	void setTypeZip();
+
+	void setTypeJson();
+
+	void setTypeText();
+
+	void setTypeSvg();
 }

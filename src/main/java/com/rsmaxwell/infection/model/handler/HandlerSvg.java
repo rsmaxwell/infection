@@ -13,6 +13,9 @@ public class HandlerSvg extends HandlerGraphics {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeSvg();
+
 		OutputStream out = response.getOutputStream();
 		populations.output_svg(out, filter, width, height);
 	}

@@ -13,6 +13,9 @@ public class HandlerText extends Handler {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeText();
+
 		try (PrintWriter out = response.getWriter()) {
 			populations.print(out, filter);
 		}

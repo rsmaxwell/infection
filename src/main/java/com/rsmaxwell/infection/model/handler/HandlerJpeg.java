@@ -13,6 +13,9 @@ public class HandlerJpeg extends HandlerGraphics {
 
 	@Override
 	public void format(MyResponseInterface response, Populations populations) throws Exception {
+
+		response.setTypeJpeg();
+
 		OutputStream out = response.getOutputStream();
 		populations.output_jpeg(out, filter, width, height);
 	}
