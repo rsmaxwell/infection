@@ -15,7 +15,7 @@ Where {filename} is a configuration file in json format.
 
 A population is constructed from each group, and the SIR model used to predict the progress of an infection. 
 Output is generated for each population and also a combined output for the total population named `All`.
-The output is formated as requested in the `results.format`. 
+The output is formated as requested in the `output` section of the configuration.  
 
 Simple configuration:
 
@@ -44,27 +44,58 @@ Simple configuration:
 }
 ```
 
-A group defines the initial state of a population. The name of a group is expected to be alphanumeric 
+`maxTime` is used to set how long the simulation should run for in arbitrary time units. 
 
-If there is no connector provided from one group to another, then a default connection must be provided. 
-The name of the connection is expected to be 2 group names separated by a dot   
+### groups
+
+A group defines the initial state of a population. The group ID must be alphanumeric.
+
+`name` is the display name for the group
+
+`recovery` is constant related to how long an individual takes to recover after being infected.
+
+`iStart` is used to set a populations initial infected value.
+
+`rStart` is an optional field (default value 0) and is used to set a populations initial recovered value.
+
+A populations initial susceptible value is calculated from: `1.0 - iStart - rStart`
+
+
+### connectors
+
+A connection represents properties related to a pair of groups. In particular how easily an infection passes from 
+one population to another. 
+
+If there is no connector provided from one group to another, then a default connection must be provided.
+ 
+The ID of the connection is composed of the 2 group IDs separated by a dot.
+   
 The name of the default connection is the special name `default`
 
-### Results
+`transmission` is a constant related to how easily an infection spreads from one population to another
+
+`transmissionEval` is a groovy expression which evaluates to the transmission constant 
+
+`transmissionScript` is the name of a groovy script located under the `./scripts/` directory, which returns the transmission constant 
+
+Only one of `transmission`, `transmissionEval`, `transmissionScript` should be specified.
+
+
+### output
 
 The `output` section defines how these results are formatted to generate the stream which is returned to the user. 
-The `output.format` field may be one of the following values:
+The `format` field may be one of the following values:
 
-| output.format | Type of stream | contents of stream                                       | parameters                                   | 
-|---------------|----------------|----------------------------------------------------------|----------------------------------------------|
-| jpeg          | binary         | single results graph as a jpeg image                     | String[] filter, int width, int height       |
-| png           | binary         | single results graph as a png image                      | String[] filter, int width, int height       |
-| svg           | binary         | single results graph as an svg image                     | String[] filter, int width, int height       |
-| jpegzip       | binary         | multiple results graphs as a zip containing jpeg images  | String[] filter, int width, int height       |
-| pngzip        | binary         | multiple results graphs as a zip containing png images   | String[] filter, int width, int height       |
-| svgzip        | binary         | multiple results graphs as a zip containing svg images   | String[] filter, int width, int height       |
-| json          | character      | raw data in json format                                  | String[] filter                              |
-| text          | character      | raw data in text format                                  | String[] filter                              |
+| format  | Type of stream | contents of stream                                       | parameters                                   | 
+|---------|----------------|----------------------------------------------------------|----------------------------------------------|
+| jpeg    | binary         | single results graph as a jpeg image                     | String[] filter, int width, int height       |
+| png     | binary         | single results graph as a png image                      | String[] filter, int width, int height       |
+| svg     | binary         | single results graph as an svg image                     | String[] filter, int width, int height       |
+| jpegzip | binary         | multiple results graphs as a zip containing jpeg images  | String[] filter, int width, int height       |
+| pngzip  | binary         | multiple results graphs as a zip containing png images   | String[] filter, int width, int height       |
+| svgzip  | binary         | multiple results graphs as a zip containing svg images   | String[] filter, int width, int height       |
+| json    | character      | raw data in json format                                  | String[] filter                              |
+| text    | character      | raw data in text format                                  | String[] filter                              |
 
 The `output.filter` parameter allows a subset of the results to be output. The format is simply a list of the population group names and/or the 
 special  population `All`.

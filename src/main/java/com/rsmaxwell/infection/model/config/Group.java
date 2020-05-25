@@ -5,7 +5,8 @@ public class Group {
 	public String name;
 	public double recovery;
 	public double population;
-	public double iStart;
+	public Double iStart;
+	public Double rStart;
 
 	public static String validateName(String name) throws Exception {
 

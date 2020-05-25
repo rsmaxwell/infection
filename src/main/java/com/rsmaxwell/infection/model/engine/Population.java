@@ -55,9 +55,18 @@ public class Population {
 		this.id = id;
 		this.group = group;
 
-		double iStart = group.iStart;
-		double sStart = 1.0 - group.iStart;
+		double iStart = 0;
+		if (group.iStart != null) {
+			iStart = group.iStart;
+		}
+
 		double rStart = 0;
+		if (group.rStart != null) {
+			rStart = group.rStart;
+		}
+
+		double sStart = 1.0 - iStart - rStart;
+
 		sir = new Quantity(sStart, iStart, rStart);
 		delta = new Quantity();
 	}
@@ -222,8 +231,7 @@ public class Population {
 		}
 	}
 
-	public void output_svg(OutputStream out, int width, int height)
-			throws UnsupportedEncodingException, FileNotFoundException, SVGGraphics2DIOException {
+	public void output_svg(OutputStream out, int width, int height) throws UnsupportedEncodingException, FileNotFoundException, SVGGraphics2DIOException {
 
 		JFreeChart chart = createChart();
 
