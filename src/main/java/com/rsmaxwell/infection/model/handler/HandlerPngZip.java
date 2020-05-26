@@ -12,7 +12,7 @@ public class HandlerPngZip extends HandlerGraphics {
 	}
 
 	@Override
-	public void format(MyResponseInterface response, Populations populations) throws Exception {
+	public void format(ResponseCollectorInterface response, Populations populations) throws Exception {
 
 		response.setTypeZip();
 

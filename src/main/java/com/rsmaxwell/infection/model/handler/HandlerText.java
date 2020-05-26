@@ -12,7 +12,7 @@ public class HandlerText extends Handler {
 	}
 
 	@Override
-	public void format(MyResponseInterface response, Populations populations) throws Exception {
+	public void format(ResponseCollectorInterface response, Populations populations) throws Exception {
 
 		response.setTypeText();
 

@@ -4,7 +4,7 @@ import com.rsmaxwell.infection.model.engine.Populations;
 
 public interface HandlerInterface {
 
-	void format(MyResponseInterface response, Populations populations) throws Exception;
+	void format(ResponseCollectorInterface response, Populations populations) throws Exception;
 
 	boolean isText();
 

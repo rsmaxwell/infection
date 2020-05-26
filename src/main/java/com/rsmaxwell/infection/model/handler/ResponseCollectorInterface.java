@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-public interface MyResponseInterface {
+public interface ResponseCollectorInterface {
 
 	OutputStream getOutputStream() throws IOException;
 

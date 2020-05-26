@@ -1,6 +1,6 @@
 package com.rsmaxwell.infection.model.handler;
 
-public abstract class MyResponseAbstract implements MyResponseInterface {
+public abstract class ResponseCollectorAbstract implements ResponseCollectorInterface {
 
 	@Override
 	public void setTypeJpeg() {
