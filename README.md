@@ -1,4 +1,4 @@
-outputoutput# infection
+# model
 
 Uses a simple SIR compartmental model to predict the progress of an infection in a set of populations. 
 
