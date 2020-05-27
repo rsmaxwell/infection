@@ -1,6 +1,6 @@
 package com.rsmaxwell.infection.model.expression;
 
-public class Value implements Expression {
+public class Value extends Expression {
 
 	private double value;
 
@@ -9,7 +9,7 @@ public class Value implements Expression {
 	}
 
 	@Override
-	public double getValue(double t, String id1, String id2) {
+	public double getValue(double time, String group1, String group22) {
 		return value;
 	}
 }

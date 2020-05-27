@@ -10,7 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.rsmaxwell.infection.model.expression.Evaluate;
 import com.rsmaxwell.infection.model.expression.Expression;
-import com.rsmaxwell.infection.model.expression.Script;
+import com.rsmaxwell.infection.model.expression.MyScript;
 import com.rsmaxwell.infection.model.expression.Value;
 
 class ConnectorsDeserializer implements JsonDeserializer<Connectors> {
@@ -40,7 +40,7 @@ class ConnectorsDeserializer implements JsonDeserializer<Connectors> {
 			} else if (literal.transmissionEval != null) {
 				expression = new Evaluate(literal.transmissionEval);
 			} else if (literal.transmissionScript != null) {
-				expression = new Script(literal.transmissionScript);
+				expression = new MyScript(literal.transmissionScript);
 			} else {
 				expression = new Value(0);
 			}

@@ -1,11 +1,13 @@
 package com.rsmaxwell.infection.model.expression;
 
-import com.rsmaxwell.infection.model.app.MySecurityManager;
-import com.rsmaxwell.infection.model.app.SecurityMode;
+import java.io.IOException;
 
-import groovy.util.Eval;
+import org.codehaus.groovy.control.CompilerConfiguration;
 
-public class Evaluate implements Expression {
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
+public class Evaluate extends Expression {
 
 	private String string;
 
@@ -14,33 +16,14 @@ public class Evaluate implements Expression {
 	}
 
 	@Override
-	public double getValue(double t, String id1, String id2) throws Exception {
+	public double getValue(double time, String group1, String group2) throws Exception {
 
-		SecurityManager securityManager = System.getSecurityManager();
-
-		if (securityManager == null) {
-			return evaluate(t, id1, id2);
-		}
-
-		if (!(securityManager instanceof MySecurityManager)) {
-			return evaluate(t, id1, id2);
-		}
-
-		MySecurityManager mySecurityManager = (MySecurityManager) securityManager;
-		try {
-			mySecurityManager.setSecurityMode(SecurityMode.LOCKDOWN);
-			return evaluate(t, id1, id2);
-		} finally {
-			mySecurityManager.setSecurityMode(SecurityMode.OPEN);
-		}
-	}
-
-	private double evaluate(double t, String id1, String id2) throws Exception {
-
-		Object object = Eval.xyz("t", "id1", "id2", string);
+		Binding binding = getBinding(time, group1, group2);
+		GroovyShell shell = getGroovyShell(binding);
+		Object object = shell.evaluate(string);
 
 		if (object == null) {
-			throw new Exception("Expression '" + string + "' returned null");
+			throw new Exception("Expression '" + string + "' returned null : " + bindingToString(time, group1, group2));
 		}
 
 		if (object instanceof Number) {
@@ -48,6 +31,14 @@ public class Evaluate implements Expression {
 			return number.doubleValue();
 		}
 
-		throw new Exception("Expression '" + string + "' returned unexpected type: " + object.getClass().getSimpleName());
+		throw new Exception("Expression '" + string + "' returned unexpected type: " + object.getClass().getSimpleName() + " : " + bindingToString(time, group1, group2));
 	}
+
+	// Create a GroovyShell which only supports arithmetic operations
+	private GroovyShell getGroovyShell(Binding binding) throws IOException {
+		CompilerConfiguration config = getCompilerConfiguration();
+		GroovyShell shell = new GroovyShell(binding, config);
+		return shell;
+	}
+
 }
