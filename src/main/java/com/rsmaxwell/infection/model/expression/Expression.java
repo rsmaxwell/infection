@@ -34,18 +34,14 @@ public abstract class Expression {
 
 		//@formatter:off
 		secure.setImportsWhitelist(Arrays.asList(
-			"java.lang.Math", 
-			"java.lang.Object"
+			"java.lang.Math"
 			));
 		
 		secure.setStaticImportsWhitelist(Arrays.asList(
-			"java.lang.Object.parameters", 
-			"java.lang.Object.println"
 			));
 
         secure.setStaticStarImportsWhitelist(Arrays.asList(
-            "java.lang.Math",
-            "java.lang.Object"
+            "java.lang.Math"
             ));
         
         secure.setTokensWhitelist(Arrays.asList(
@@ -62,8 +58,7 @@ public abstract class Expression {
             Types.COMPARE_LESS_THAN,
             Types.COMPARE_LESS_THAN_EQUAL,
             Types.COMPARE_GREATER_THAN,
-            Types.COMPARE_GREATER_THAN_EQUAL,
-            Types.ASSIGN
+            Types.COMPARE_GREATER_THAN_EQUAL
             ));
         
         secure.setConstantTypesClassesWhiteList(Arrays.asList(
